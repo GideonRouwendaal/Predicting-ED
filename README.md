@@ -4,7 +4,7 @@
 
 This repository contains the implementation of using preoperative MRI to classify erectile dysfunction (ED). We assess whether preoperative MRI provides predictive value for ED at 12 months post-radical prostatectomy, beyond established clinical predictors. Our pipeline includes the establishment of a clinical baseline, segmentation-based anatomical features, deep learning on MRI slices, and multimodal fusion models. A schematic overview can be found below 
 
-![Schematic Overview](imgs/Schematic_Overview.jpg)
+![Schematic Overview](imgs/Schematic_overview.jpg)
 
 ---
 
