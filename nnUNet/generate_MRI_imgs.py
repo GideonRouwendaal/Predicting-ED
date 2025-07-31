@@ -152,13 +152,10 @@ for label in to_predict_labels:
 
     ED_NO_ED = ["ED/", "no_ED/"]
     for ed_no in ED_NO_ED:
-        full_train_path, full_test_path = train_path + ed_no, test_path + ed_no
+        full_train_path = train_path + ed_no
         os.makedirs(output_data_path_mid_prostate + full_train_path, exist_ok=True)
-        os.makedirs(output_data_path_mid_prostate + full_test_path, exist_ok=True)
         os.makedirs(output_data_path_mid_prostate_multiple_slices + full_train_path, exist_ok=True)
-        os.makedirs(output_data_path_mid_prostate_multiple_slices + full_test_path, exist_ok=True)
         os.makedirs(output_data_path_mid_prostate_3D + full_train_path, exist_ok=True)
-        os.makedirs(output_data_path_mid_prostate_3D + full_test_path, exist_ok=True)
 
 
 patients = [
@@ -167,11 +164,6 @@ patients = [
     and len([f for f in os.listdir(os.path.join(input_data_path, patient))]) < 2
 ]
 
-test_patients = [
-    patient for patient in os.listdir(input_data_path)
-    if "Patient" in patient and "Anonymized" in patient
-    and len([f for f in os.listdir(os.path.join(input_data_path, patient))]) >= 2
-]
 
 # load data
 df = pd.read_excel(input_data_path + "/IIEF_labels.xlsx")
@@ -188,15 +180,9 @@ print(f"Total number of patients in the excel with preop ok = {len(df)}")
 df_train = df[df["AnonymizedName"].isin(patients)]
 patients = df_train["AnonymizedName"].tolist()
 
-df_test = df[df["AnonymizedName"].isin(test_patients)]
-test_patients = df_test["AnonymizedName"].tolist()
-
-print(f"Total number of patients with a nnUNet segmentation and label = {len(patients)}")
-print(f"Total number of test patients = {len(test_patients)}")
-
-n_train, n_test = 0, 0
+n_train = 0
 for file, patient in tqdm(mapping.items()):
-    if patient not in patients and patient not in test_patients:
+    if patient not in patients:
         continue
     data_path_full = input_data_path + patient + "/"
     splitted_patient = file.split(".")
@@ -208,8 +194,6 @@ for file, patient in tqdm(mapping.items()):
     train_test = "Train" if patient in patients else "Test"
     if train_test == "Train":
         n_train += 1
-    else:
-        n_test += 1
     label_value = df.loc[df["AnonymizedName"] == patient, "IIEF15_01_12m"].values[0]
     if pd.isna(label_value):
         print(f"Could not label for patient {patient}")
@@ -225,4 +209,3 @@ for file, patient in tqdm(mapping.items()):
         sitk.WriteImage(img_slice, output_data_path_mid_prostate_multiple_slices + f"IIEF15_01_12m/{train_test}/{label_value}/{patient}_slice_{i}.nrrd")
 
 print(f"Number of patients in the train set = {n_train}")
-print(f"Number of patients in the test set = {n_test}")
